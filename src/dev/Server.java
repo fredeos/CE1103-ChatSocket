@@ -1,65 +1,57 @@
 package src.dev;
-
+//Libraries needed for the class
 import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 
-public class Server {
-    public static void main(String[] args){
-        //Iniatilizing the variables for server
-        final ServerSocket serverSocket ;
-        final Socket clientSocket ;
-        final BufferedReader in;
-        final PrintWriter out;
-        final Scanner sc=new Scanner(System.in);
-        //trying to make a connection
+public class ChatServer {
+    private ServerSocket serverSocket;
+    private Socket clientSocket;
+    private PrintWriter out;
+    private BufferedReader in;
+
+    public void start(int port) throws IOException {//Iniatilizing the server using sockets
+        serverSocket = new ServerSocket(port);
+        System.out.println("Servidor iniciado en el puerto " + port);
+
+        clientSocket = serverSocket.accept();
+        System.out.println("Cliente conectado: " + clientSocket.getInetAddress());
+
+        // messages of entry and exit
+        out = new PrintWriter(clientSocket.getOutputStream(), true);
+        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+    }
+
+    public void sendMessage(String message) {// method to send messeges to client
+        out.println(message);
+    }
+
+    public String receiveMessage() throws IOException {// method to receive messeges from client
+        return in.readLine();
+    }
+
+    public void stop() throws IOException {// method to stop the server if it requiered
+        in.close();
+        out.close();
+        clientSocket.close();
+        serverSocket.close();
+        System.out.println("Servidor detenido");
+    }
+
+    """public static void main(String[] args) { // this method is an example of the way to use the class
+        ChatServer server = new ChatServer();
+        int port = 12345; // Port that the server will listen
         try {
-            serverSocket = new ServerSocket(5000);
-            clientSocket = serverSocket.accept();
-            out = new PrintWriter(clientSocket.getOutputStream());
-            in = new BufferedReader (new InputStreamReader(clientSocket.getInputStream()));
+            server.start(port);
 
-            Thread sender= new Thread(new Runnable() {
-                String msg; //variable that contain the data of users
-                @Override   // run method is overriding
-                public void run() {
-                    while(true){
-                        msg = sc.nextLine(); //reads data from user's keybord
-                        out.println(msg);    // write data stored in msg in the clientSocket
-                        out.flush();   // forces the sending of the data
-                    }
-                }
-            });
-            //iniatilizing sender
-            sender.start();
+            // This is just an example of how to use the class
+            server.sendMessage("¡Hola cliente!");
+            String receivedMessage = server.receiveMessage();
+            System.out.println("Mensaje del cliente: " + receivedMessage);
 
-            Thread receive= new Thread(new Runnable() {
-                String msg ;
-                @Override
-                public void run() {
-                    try {
-                        msg = in.readLine();
-                        //tant que le client est connecté
-                        while(msg!=null){
-                            System.out.println("Client : "+msg); // reading and print the message, this must be reading and show by the app
-                            msg = in.readLine();
-                        }
-
-                        System.out.println("Client déconecté");// reading if the client is conected
-
-                        out.close();
-                        clientSocket.close();
-                        serverSocket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            receive.start();
+            server.stop();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-
+        }"""
     }
-}
+
