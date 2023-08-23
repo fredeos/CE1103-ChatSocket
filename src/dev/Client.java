@@ -18,28 +18,30 @@ public class Client{
  * parameters(String argIP, int argPort)
 */
     public static void connect(String argIP, int argPort) throws IOException{
-    // These are the port and IP addres to which the client connects
-        String SERVER_IP = argIP;
-        int SERVER_PORT =  argPort;
         try{
-            clientSocket = new Socket(SERVER_IP, SERVER_PORT);
+            clientSocket = new Socket(argIP, argPort);
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(clientSocket.getOutputStream(), true);
-            System.out.println("Connecting to server at: " + "PORT=" + SERVER_PORT + "; IP=" + SERVER_IP);
+            System.out.println("Connecting to server at: " + "PORT=" + argPort+ "; IP=" + argIP);
         } catch (IOException error){ //El catch obtiene los errores cuando no hay conexion con los puertos o con la IP.
-            System.out.println("No server found at: " + SERVER_IP+", "+ SERVER_PORT);
+            System.out.println("No server found at: " + argIP+", "+ argPort);
             error.getStackTrace();
         }
     }
     public static void sendmessage(String message) throws IOException{
         out.println(message);
+        System.out.println("You sent: " + message);
     }
 
     public static void recievemsg() throws IOException{
-        if (!(in.readLine().trim()).isEmpty()){
-            receivedmsg = in.readLine();
-        } else {
-            receivedmsg = null;
-        }
+        receivedmsg = in.readLine().trim();
+        System.out.println("Server sent: " + receivedmsg);
+        logicalgi.updatelog(receivedmsg, false);
+    }
+    public static void stop() throws IOException {// method to stop the server if it required
+        in.close();
+        out.close();
+        clientSocket.close();
+        System.out.println("Client left");
     }
 }
