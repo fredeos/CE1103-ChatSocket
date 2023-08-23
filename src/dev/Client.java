@@ -8,8 +8,7 @@ import javax.imageio.IIOException;
 
 /*The Client.java(& Client.class) is the separate file for setting up the client socket */
 public class Client{
-    public static String receivedmsg;
-
+    private static String receivedmsg;
     private static Socket clientSocket;
     private static BufferedReader in;
     private static PrintWriter out;
