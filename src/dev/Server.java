@@ -1,24 +1,51 @@
 package src.dev;
 
+import src.dev.Client;
 import java.io.*;
 import java.net.*;
+import java.util.zip.InflaterInputStream;
 
-public class Server{
-    /*Boots the server to listen to the designed port and IP*/
-    public static void startup(){
-        String IP = "127.0.0.1";
-        int PORT =  3000;
-        try{
-            InetAddress address = InetAddress.getByName(IP);
-            // Line 18: binds the desired string IP to the network as a host
-            ServerSocket serverSocket = new ServerSocket(PORT, 20, address);
-            System.out.println("Listening on: " + PORT + " at " + IP);
+public class Server {
+    private static String receivedmsg;
 
-        }
-        catch(IOException error){
-            System.out.println("Got error");
-            error.getStackTrace();
+    private static ServerSocket serverSocket;
+    private static Socket clientSocket;
+    private static PrintWriter out;
+    private static BufferedReader in;
+
+    public static void startup(String argIP, int argPort) throws IOException { //Iniatilizing the server using sockets
+        String SERVER_IP = argIP;
+        int SERVER_PORT = argPort;
+        InetAddress address = InetAddress.getByName(SERVER_IP);
+        serverSocket = new ServerSocket(SERVER_PORT,20,address);
+        System.out.println("Server started at: " + SERVER_IP + ", " + SERVER_PORT);
+
+        clientSocket = serverSocket.accept();
+        System.out.println("Client connected: " + clientSocket.getInetAddress());
+
+        // Messages of entry and exit
+        out = new PrintWriter(clientSocket.getOutputStream(), true);
+        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+    }
+    public static void sendMessage(String message) {// method to send messages to client
+        out.println(message);
+    }
+
+    public static void receiveMessage() throws IOException {// method to receive messages from client
+        if (!(in.readLine().trim()).isEmpty()){
+            receivedmsg = in.readLine();
+        } else {
+            receivedmsg = null;
         }
     }
-}
 
+    //public static void getmessage(){}
+
+    public static void stop() throws IOException {// method to stop the server if it required
+        in.close();
+        out.close();
+        clientSocket.close();
+        serverSocket.close();
+        System.out.println("Server stopped");
+    }
+}
