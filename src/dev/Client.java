@@ -1,6 +1,8 @@
 package src.dev;
 
 import src.dev.Server;
+import src.devlogigalgi;
+
 import java.io.*;
 import java.net.*;
 import java.util.zip.InflaterInputStream;
