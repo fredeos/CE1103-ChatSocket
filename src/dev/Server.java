@@ -7,36 +7,41 @@ import java.util.zip.InflaterInputStream;
 
 public class Server {
     private static String receivedmsg;
-
     private static ServerSocket serverSocket;
     private static Socket clientSocket;
     private static PrintWriter out;
     private static BufferedReader in;
 
     public static void startup(String argIP, int argPort) throws IOException { //Iniatilizing the server using sockets
-        String SERVER_IP = argIP;
-        int SERVER_PORT = argPort;
-        InetAddress address = InetAddress.getByName(SERVER_IP);
-        serverSocket = new ServerSocket(SERVER_PORT,20,address);
-        System.out.println("Server started at: " + SERVER_IP + ", " + SERVER_PORT);
+        //Se asigna una variable para convertir el IP del server
+        InetAddress address = InetAddress.getByName(argIP);
+        serverSocket = new ServerSocket(argPort,1,address);
+        System.out.println("Server started at: " + argPort + ", " + argIP);
 
-        clientSocket = serverSocket.accept();
-        System.out.println("Client connected: " + clientSocket.getInetAddress());
-
-        // Messages of entry and exit
-        out = new PrintWriter(clientSocket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        //Se inicia un thread separado para esperar la conneccion de un socket cliente
+        Thread clientThread = new Thread(()->{
+            try {
+                serverSocket.setSoTimeout(10000);
+                clientSocket = serverSocket.accept();
+                System.out.println("Client connected: " + clientSocket.getInetAddress());
+            // Messages of entry and exit
+                out = new PrintWriter(clientSocket.getOutputStream(), true);
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            } catch (IOException error){
+                error.getStackTrace();
+            }
+        });
+        clientThread.start();
     }
     public static void sendMessage(String message) {// method to send messages to client
         out.println(message);
+        System.out.println("You(host) sent: "+ message);
     }
 
     public static void receiveMessage() throws IOException {// method to receive messages from client
-        if (!(in.readLine().trim()).isEmpty()){
-            receivedmsg = in.readLine();
-        } else {
-            receivedmsg = null;
-        }
+        receivedmsg = in.readLine().trim();
+        System.out.println("Client sent: " + receivedmsg);
+        logicalgi.updatelog(receivedmsg, true);
     }
 
     //public static void getmessage(){}
