@@ -3,10 +3,13 @@ package src.dev;
 import src.dev.Server;
 import src.dev.Client;
 
+import java.io.IOException;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
@@ -21,7 +24,13 @@ public class logicalgi extends Application{
     private int[] rootSize = {600,450};
     private String wIP="127.0.0.1";
     private int wPort=3000;
+    private static int[] subSize = {650, 350};
+    
+//TextArea objects(nodes) for storing the messages during a chat session.
+    private static TextArea clientlog = new TextArea();
+    private static TextArea serverlog = new TextArea();
 
+/*Initializes the main window(hub) for creating a joining chats*/
     @Override
     public void start(Stage primaryStage) throws Exception {
     //Main container(Pane) for the scene
@@ -135,22 +144,121 @@ public class logicalgi extends Application{
         primaryStage.setScene(mainscene);
         primaryStage.show();
     }
+
+/*Initializes a second window for displaying the client chat window*/
     public static void clientwindow(){
+//Window containers
         Pane subPane = new Pane();
+        AnchorPane margins = new AnchorPane();
+            clientlog.setPrefSize((double)subSize[0],(double)subSize[1]);
+            clientlog.setEditable(false);
+            margins.setTopAnchor(clientlog, 0.0);
+            margins.setLeftAnchor(clientlog, 0.0);
+        ScrollPane txtscroll = new ScrollPane(clientlog);
+
+    //Nodes
+        //     _______________________
+        //____/ 1st order objects(Plain/non-interactive)
+        Rectangle bottombar = new Rectangle((double)subSize[0]-30, 40.0,Color.DARKCYAN);
+        bottombar.setArcHeight(20);
+        bottombar.setArcWidth(20);
+            margins.setBottomAnchor(bottombar, 5.0);
+            margins.setLeftAnchor(bottombar, 15.0);
+
+        //     ________________________
+        //____/ 2nd order objects(interactive:Textfield)
+        TextField entermsg = new TextField();
+        entermsg.setPromptText("Write something");
+        entermsg.setPrefSize(bottombar.getWidth()-90, bottombar.getHeight()-10);
+            margins.setBottomAnchor(entermsg, 10.0);
+            margins.setLeftAnchor(entermsg, 95.0);
+
+        //     _______________________
+        //____/ 3rd order objects(interactive:buttons)
+        Button sendbutton = new Button("SEND");
+        sendbutton.setPrefSize(60.0, 25.0);
+        sendbutton.setTextAlignment(TextAlignment.CENTER);
+            margins.setBottomAnchor(sendbutton, 12.0);
+            margins.setLeftAnchor(sendbutton, 27.5);
+        sendbutton.setOnAction(event ->{
+            String msg = entermsg.getText().trim();
+            if(!msg.isEmpty()){
+                clientlog.appendText("ClientSays: "+msg+"\n");
+                System.out.println("Message sent("+msg+")");
+                entermsg.clear();
+            }else {
+                System.out.println("Message was empty");
+            }
+        });
+
+
+    //Addition of the nodes to each layer
+        margins.getChildren().addAll(txtscroll, bottombar, sendbutton, entermsg);
+        subPane.getChildren().addAll(margins);
+    //Stage setup
         Stage clientstage = new Stage();
         clientstage.setTitle("ClientChat");
-        Scene nxtscene = new Scene(subPane);
+        Scene nxtscene = new Scene(subPane, subSize[0], subSize[1]);
         clientstage.setScene(nxtscene);
         clientstage.show();
     }
+
+/*Initializes a second window for displaying the server(host) chat window*/
     public static void serverwindow(){
+    //Window containers
         Pane subPane = new Pane();
+        AnchorPane margins = new AnchorPane();
+            serverlog.setPrefSize((double)subSize[0],(double)subSize[1]);
+            serverlog.setEditable(false);
+            margins.setTopAnchor(serverlog, 0.0);
+            margins.setLeftAnchor(serverlog, 0.0);
+        ScrollPane txtscroll = new ScrollPane(serverlog);
+
+    //Nodes
+        //     _______________________
+        //____/ 1st order objects(Plain/non-interactive)
+        Rectangle bottombar = new Rectangle((double)subSize[0]-30, 40.0,Color.DARKCYAN);
+        bottombar.setArcHeight(20);
+        bottombar.setArcWidth(20);
+            margins.setBottomAnchor(bottombar, 5.0);
+            margins.setLeftAnchor(bottombar, 15.0);
+        //     ________________________
+        //____/ 2nd order objects(interactive:Textfield)
+        TextField entermsg = new TextField();
+        entermsg.setPromptText("Write something");
+        entermsg.setPrefSize(bottombar.getWidth()-90, bottombar.getHeight()-10);
+            margins.setBottomAnchor(entermsg, 10.0);
+            margins.setLeftAnchor(entermsg, 95.0);
+
+        //     _______________________
+        //____/ 3rd order objects(interactive:buttons)
+        Button sendbutton = new Button("SEND");
+        sendbutton.setPrefSize(60.0, 25.0);
+        sendbutton.setTextAlignment(TextAlignment.CENTER);
+            margins.setBottomAnchor(sendbutton, 12.0);
+            margins.setLeftAnchor(sendbutton, 27.5);
+        sendbutton.setOnAction(event ->{
+            String msg = entermsg.getText().trim();
+            if(!msg.isEmpty()){
+                serverlog.appendText("ServerSays: "+msg+"\n");
+                System.out.println("Message sent("+msg+")");
+                entermsg.clear();
+            }else {
+                System.out.println("Message was empty");
+            }
+        });
+    //Addition of nodes to each layer
+        
+        margins.getChildren().addAll(txtscroll, bottombar, sendbutton, entermsg);
+        subPane.getChildren().addAll(margins);
+    //Stage setup
         Stage serverstage = new Stage();
         serverstage.setTitle("ServerChat");
-        Scene nxtscene = new Scene(subPane);
+        Scene nxtscene = new Scene(subPane,subSize[0], subSize[1]);
         serverstage.setScene(nxtscene);
         serverstage.show();
     }
+    
     public static void main(String[] args){
         launch(args);
     }
