@@ -150,7 +150,7 @@ public class logicalgi extends Application{
 //Window containers
         Pane subPane = new Pane();
         AnchorPane margins = new AnchorPane();
-            clientlog.setPrefSize((double)subSize[0],(double)subSize[1]);
+            clientlog.setPrefSize((double)subSize[0],(double)subSize[1]-48);
             clientlog.setEditable(false);
             margins.setTopAnchor(clientlog, 0.0);
             margins.setLeftAnchor(clientlog, 0.0);
@@ -159,42 +159,46 @@ public class logicalgi extends Application{
     //Nodes
         //     _______________________
         //____/ 1st order objects(Plain/non-interactive)
-        Rectangle bottombar = new Rectangle((double)subSize[0]-30, 40.0,Color.DARKCYAN);
+        Rectangle bottombar = new Rectangle((double)subSize[0]-28, 40.0,Color.DARKCYAN);
         bottombar.setArcHeight(20);
         bottombar.setArcWidth(20);
-            margins.setBottomAnchor(bottombar, 5.0);
-            margins.setLeftAnchor(bottombar, 15.0);
+            bottombar.setLayoutX(13.0);
+            bottombar.setLayoutY((double)subSize[1]-44);
 
         //     ________________________
         //____/ 2nd order objects(interactive:Textfield)
         TextField entermsg = new TextField();
         entermsg.setPromptText("Write something");
-        entermsg.setPrefSize(bottombar.getWidth()-90, bottombar.getHeight()-10);
-            margins.setBottomAnchor(entermsg, 10.0);
-            margins.setLeftAnchor(entermsg, 95.0);
+        entermsg.setPrefSize(bottombar.getWidth()-85, bottombar.getHeight()-10);
+            entermsg.setLayoutX(bottombar.getLayoutX()+75);
+            entermsg.setLayoutY(bottombar.getLayoutY()+5);
 
         //     _______________________
         //____/ 3rd order objects(interactive:buttons)
         Button sendbutton = new Button("SEND");
         sendbutton.setPrefSize(60.0, 25.0);
         sendbutton.setTextAlignment(TextAlignment.CENTER);
-            margins.setBottomAnchor(sendbutton, 12.0);
-            margins.setLeftAnchor(sendbutton, 27.5);
+            sendbutton.setLayoutX(bottombar.getLayoutX()+7);
+            sendbutton.setLayoutY(bottombar.getLayoutY()+7.5);
         sendbutton.setOnAction(event ->{
             String msg = entermsg.getText().trim();
             if(!msg.isEmpty()){
                 clientlog.appendText("ClientSays: "+msg+"\n");
-                System.out.println("Message sent("+msg+")");
+                try{
+                    Client.sendMessage(msg);
+                    Server.receiveMessage();
+                } catch (IOException error){
+                    error.getStackTrace();
+                }
                 entermsg.clear();
             }else {
                 System.out.println("Message was empty");
             }
         });
 
-
     //Addition of the nodes to each layer
-        margins.getChildren().addAll(txtscroll, bottombar, sendbutton, entermsg);
-        subPane.getChildren().addAll(margins);
+        margins.getChildren().addAll(txtscroll);
+        subPane.getChildren().addAll(margins, bottombar, sendbutton, entermsg);
     //Stage setup
         Stage clientstage = new Stage();
         clientstage.setTitle("ClientChat");
@@ -208,7 +212,7 @@ public class logicalgi extends Application{
     //Window containers
         Pane subPane = new Pane();
         AnchorPane margins = new AnchorPane();
-            serverlog.setPrefSize((double)subSize[0],(double)subSize[1]);
+            serverlog.setPrefSize((double)subSize[0],(double)subSize[1]-48);
             serverlog.setEditable(false);
             margins.setTopAnchor(serverlog, 0.0);
             margins.setLeftAnchor(serverlog, 0.0);
@@ -217,46 +221,62 @@ public class logicalgi extends Application{
     //Nodes
         //     _______________________
         //____/ 1st order objects(Plain/non-interactive)
-        Rectangle bottombar = new Rectangle((double)subSize[0]-30, 40.0,Color.DARKCYAN);
+        Rectangle bottombar = new Rectangle((double)subSize[0]-28, 40.0,Color.DARKCYAN);
         bottombar.setArcHeight(20);
         bottombar.setArcWidth(20);
-            margins.setBottomAnchor(bottombar, 5.0);
-            margins.setLeftAnchor(bottombar, 15.0);
+            bottombar.setLayoutX(13.0);
+            bottombar.setLayoutY((double)subSize[1]-44);
         //     ________________________
         //____/ 2nd order objects(interactive:Textfield)
         TextField entermsg = new TextField();
         entermsg.setPromptText("Write something");
-        entermsg.setPrefSize(bottombar.getWidth()-90, bottombar.getHeight()-10);
-            margins.setBottomAnchor(entermsg, 10.0);
-            margins.setLeftAnchor(entermsg, 95.0);
+        entermsg.setPrefSize(bottombar.getWidth()-85, bottombar.getHeight()-10);
+            entermsg.setLayoutX(bottombar.getLayoutX()+75);
+            entermsg.setLayoutY(bottombar.getLayoutY()+5);
 
         //     _______________________
         //____/ 3rd order objects(interactive:buttons)
         Button sendbutton = new Button("SEND");
         sendbutton.setPrefSize(60.0, 25.0);
         sendbutton.setTextAlignment(TextAlignment.CENTER);
-            margins.setBottomAnchor(sendbutton, 12.0);
-            margins.setLeftAnchor(sendbutton, 27.5);
+            sendbutton.setLayoutX(bottombar.getLayoutX()+7);
+            sendbutton.setLayoutY(bottombar.getLayoutY()+7.5);
+        
         sendbutton.setOnAction(event ->{
             String msg = entermsg.getText().trim();
             if(!msg.isEmpty()){
                 serverlog.appendText("ServerSays: "+msg+"\n");
-                System.out.println("Message sent("+msg+")");
+                try{
+                    Server.sendMessage(msg);
+                    Client.receiveMessage();
+                } catch (IOException error){
+                    error.getStackTrace();
+                }
                 entermsg.clear();
             }else {
                 System.out.println("Message was empty");
             }
         });
-    //Addition of nodes to each layer
         
-        margins.getChildren().addAll(txtscroll, bottombar, sendbutton, entermsg);
-        subPane.getChildren().addAll(margins);
+    //Addition of nodes to each layer
+        margins.getChildren().addAll(txtscroll);
+        subPane.getChildren().addAll(margins, bottombar, sendbutton, entermsg);
     //Stage setup
         Stage serverstage = new Stage();
         serverstage.setTitle("ServerChat");
         Scene nxtscene = new Scene(subPane,subSize[0], subSize[1]);
         serverstage.setScene(nxtscene);
         serverstage.show();
+    }
+    
+    /*Method for updating the respective textfield of the ongoing app
+    */
+    public static void updatelog(String arg, Boolean type){
+        if (type==true){
+            serverlog.appendText("ClientSays: "+arg+"\n");
+        } else{
+            clientlog.appendText("ServerSays: "+arg+"\n");
+        }
     }
     
     public static void main(String[] args){
