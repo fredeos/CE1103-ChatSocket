@@ -2,6 +2,7 @@ package src.dev;
 
 import java.io.*;
 import java.net.*;
+
 /*Class for Server creation and manipulation*/
 public class Server {
     private static String receivedmsg; // String variable for storing a message
@@ -35,7 +36,7 @@ public class Server {
         clientThread.start(); //Starts the thread
     }
 
-    /* Sends a a message to the BufferedReader of the client
+    /* Sends a message to the Client
     *@param message a string text that the server wants to send
     */
     public static void sendMessage(String message) {// Method to send messages to client
@@ -43,12 +44,12 @@ public class Server {
         System.out.println("You(host) sent: "+ message);
     }
 
-    /* Checks for a received message and updates the log on the Client side
+    /* Checks for a received message and updates the Server log
     */
-    public static void receiveMessage() throws IOException {// method to receive messages from client
+    public static void receiveMessage() throws IOException {
         receivedmsg = in.readLine().trim(); //Receives the decoded message and trims it to remove any blank spaces.
         System.out.println("Client sent: " + receivedmsg);
-        chatGI.updatelog(receivedmsg, true); //Moves the message over to the client message display(log)
+        chatGI.updatelog(receivedmsg, true); //Moves the message over to the server message display(log)
     }
 
     /*Stops the server socket and the connection with the client*/
