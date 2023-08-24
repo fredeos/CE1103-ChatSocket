@@ -1,8 +1,5 @@
 package src.dev;
 
-import src.dev.Server;
-import src.dev.Client;
-
 import java.io.IOException;
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -19,27 +16,29 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
-public class logicalgi extends Application{
-//Class variables for the program
-    private int[] rootSize = {600,450};
-    private String wIP="127.0.0.1";
-    private int wPort=3000;
-    private static int[] subSize = {650, 350};
+/* Chat Graphical Interface(chatgI) is the file class for running the hub, server and client windows.
+*/
+public class chatGI extends Application{
+// Class variables for the program
+    private int[] rootSize = {600,450}; //Main window(hub) window size
+    private String wIP="127.0.0.1"; //Selected IP
+    private int wPort=3000; //Selected Port
+    private static int[] subSize = {650, 350}; //Server and client windows 
     
-//TextArea objects(nodes) for storing the messages during a chat session.
+// TextArea objects(nodes) for storing the messages during a chat session. They are declarated outside any method for usage in other methods
     private static TextArea clientlog = new TextArea();
     private static TextArea serverlog = new TextArea();
 
-/*Initializes the main window(hub) for creating a joining chats*/
+/*Initializes the main window(hub) for creating and joining chats*/
     @Override
     public void start(Stage primaryStage) throws Exception {
-    //Main container(Pane) for the scene
+    //Containers for the window and nodes
         Pane rootPane = new Pane();
+        AnchorPane mainanchor = new AnchorPane(); //Anchor for margin based coordinates
 
-    //Other containers
-        AnchorPane mainanchor = new AnchorPane();
-
-    // 1st order objects(Generally non-interactive)
+    //Nodes
+        //     _______________________
+        //____/ 1st order objects(Plain/non-interactive)
         Rectangle sidebar = new Rectangle(80.0,(double)rootSize[1], Color.BLACK);
         mainanchor.setTopAnchor(sidebar, 0.0);
         mainanchor.setLeftAnchor(sidebar, 0.0);
@@ -55,17 +54,17 @@ public class logicalgi extends Application{
         headertxt.setLayoutX((double)rootSize[0]/2-130);
         headertxt.setLayoutY(20.0);
 
-        Text inIP = new Text("Enter the IP address:");
-        inIP.setStyle("-fx-font-size: 13pt");
-        inIP.setFill(Color.BLACK);
-        inIP.setLayoutX(150.0);
-        inIP.setLayoutY((double)rootSize[1]/2-70);
+        Text disIP = new Text("Enter the IP address:");
+        disIP.setStyle("-fx-font-size: 13pt");
+        disIP.setFill(Color.BLACK);
+        disIP.setLayoutX(150.0);
+        disIP.setLayoutY((double)rootSize[1]/2-70);
 
-        Text inPort = new Text("Enter the port to connect:");
-        inPort.setStyle("-fx-font-size: 13pt");
-        inPort.setFill(Color.BLACK);
-        inPort.setLayoutX(inIP.getLayoutX()+35);
-        inPort.setLayoutY(inIP.getLayoutY()+90);
+        Text disPort = new Text("Enter the port to connect:");
+        disPort.setStyle("-fx-font-size: 13pt");
+        disPort.setFill(Color.BLACK);
+        disPort.setLayoutX(inIP.getLayoutX()+35);
+        disPort.setLayoutY(inIP.getLayoutY()+90);
 
         Text help = new Text("Your IP and Port were saved! Please select to Start or Join a server");
         help.setStyle("-fx-font-size: 8pt");
@@ -73,7 +72,9 @@ public class logicalgi extends Application{
             help.setLayoutX((double)rootSize[0]/4);
             help.setLayoutY((double)rootSize[1]-40);
         help.setVisible(false);
-    // 2nd order objects(Textfields, etc...)
+
+        //     _______________________
+        //____/ 2nd order objects(Textfields)
         TextField enterIP = new TextField();
         enterIP.setPromptText("Enter a valid IP(NONE:by default 127.0.0.1)");
         enterIP.setPrefSize((double)rootSize[0]/2-30, 25.0);
@@ -86,12 +87,13 @@ public class logicalgi extends Application{
         enterPort.setLayoutX(inPort.getLayoutX());
         enterPort.setLayoutY(inPort.getLayoutY()+20);
         
-    // 3rd order objects(Interactive; like buttons)
+        //     _______________________c
+        //____/ 3rd order objects(Interactive: Buttons)
         Button startbutton = new Button("Start Hosting");
-        startbutton.setOnAction(event ->{
+        startbutton.setOnAction(event ->{ //Event handler for the action of clicking the button
             System.out.println("Starting your chat at: IP "+wIP+", PORT "+wPort);
-            Server.startup();
-            logicalgi.serverwindow();
+            Server.startup(); // Calls the booting up method of the Server.java file
+            chatGI.serverwindow(); // Creates another window for the server(host) chat
         });
         startbutton.setAlignment(Pos.CENTER);
         startbutton.setTextAlignment(TextAlignment.CENTER);
@@ -101,10 +103,10 @@ public class logicalgi extends Application{
             mainanchor.setLeftAnchor(startbutton, 5.0);
         
         Button joinbutton = new Button("Join a Host");
-        joinbutton.setOnAction(event ->{
+        joinbutton.setOnAction(event ->{ //Eveny handler for the action of clicking the button
             System.out.println("Joining your chat at: IP "+wIP+", PORT "+wPort);
-            Client.connect();
-            logicalgi.clientwindow();
+            Client.connect(); // Calls the connect method of the Client.java file for joining an on-going server
+            chatGI.clientwindow(); //Creates another windows for the client chat
         });
         joinbutton.setAlignment(Pos.CENTER);
         joinbutton.setTextAlignment(TextAlignment.CENTER);
@@ -114,19 +116,19 @@ public class logicalgi extends Application{
             mainanchor.setLeftAnchor(joinbutton, 5.0);
         
         Button okbutton = new Button("OK");
-        okbutton.setOnAction(event ->{
-            help.setVisible(true);
-            String temptxt = enterIP.getText().trim();
+        okbutton.setOnAction(event ->{ //Event handler for the action of clicking the button and saving any written IPs or Ports on the texfields
+            help.setVisible(true); // Displays a message for the user to know that IP and Port on the textfields were saved
+            String temptxt = enterIP.getText().trim(); //Gets the text on IP textfield and trims to remove any blank spaces
             if(temptxt.isEmpty()){
-                wIP = "127.0.0.1";
+                wIP = "127.0.0.1"; //IF no written input or just a blank text it sets to default IP
             } else {
-                wIP = temptxt;
+                wIP = temptxt; //ELSE there was actual input, it set the IP to the one written in the textfield
             }
-            temptxt = enterPort.getText().trim();
+            temptxt = enterPort.getText().trim();//Gets the text on Port textfield and trims to remove blank spaces
             if(temptxt.isEmpty()){
-                wPort = 3000;
+                wPort = 3000; //IF no writen input or just blank text it sets to default Port
             }else {
-                wPort = Integer.parseInt(temptxt);
+                wPort = Integer.parseInt(temptxt);//ELSE there was actual input, it casts the String input into integer and sets it as the port
             }
             System.out.println("Your IP("+wIP+") and port("+wPort+") were succesfully saved");
         });
@@ -134,27 +136,30 @@ public class logicalgi extends Application{
         okbutton.setTextAlignment(TextAlignment.CENTER);
             okbutton.setLayoutX(enterPort.getLayoutX()+90);
             mainanchor.setBottomAnchor(okbutton, 90.0);
+        
     // Creation of the scene(window)
         //Addition of nodes to the containers
         mainanchor.getChildren().addAll(sidebar, topbar,joinbutton, startbutton, okbutton);
-        rootPane.getChildren().addAll(mainanchor,headertxt,help, inIP, inPort, enterIP, enterPort);
+        rootPane.getChildren().addAll(mainanchor,headertxt, help, disIP, disPort, enterIP, enterPort);
         //Setting the stage
         primaryStage.setTitle("ChatSocket Hub");
+        primaryStage.setResizable(false);
         Scene mainscene = new Scene(rootPane, rootSize[0], rootSize[1]);
         primaryStage.setScene(mainscene);
         primaryStage.show();
     }
 
-/*Initializes a second window for displaying the client chat window*/
+/*Initializes a second window for displaying the client chat window
+*/
     public static void clientwindow(){
-//Window containers
+    //Containers for the client windows and the nodes
         Pane subPane = new Pane();
-        AnchorPane margins = new AnchorPane();
-            clientlog.setPrefSize((double)subSize[0],(double)subSize[1]-48);
+        AnchorPane margins = new AnchorPane(); // Anchor for margins based coordinates
+            clientlog.setPrefSize((double)subSize[0],(double)subSize[1]-48); // Size of the messages display
             clientlog.setEditable(false);
             margins.setTopAnchor(clientlog, 0.0);
             margins.setLeftAnchor(clientlog, 0.0);
-        ScrollPane txtscroll = new ScrollPane(clientlog);
+        ScrollPane txtscroll = new ScrollPane(clientlog); //Creates a scrollbar for the meesages display
 
     //Nodes
         //     _______________________
@@ -180,19 +185,19 @@ public class logicalgi extends Application{
         sendbutton.setTextAlignment(TextAlignment.CENTER);
             sendbutton.setLayoutX(bottombar.getLayoutX()+7);
             sendbutton.setLayoutY(bottombar.getLayoutY()+7.5);
-        sendbutton.setOnAction(event ->{
-            String msg = entermsg.getText().trim();
+        sendbutton.setOnAction(event ->{ //Event handler for the action of clicking the button
+            String msg = entermsg.getText().trim(); //Gets textfield input and trims to remove any blank spaces
             if(!msg.isEmpty()){
-                clientlog.appendText("ClientSays: "+msg+"\n");
+                clientlog.appendText("ClientSays: "+msg+"\n"); //IF there was actual input it writes it on the display
                 try{
-                    Client.sendMessage(msg);
-                    Server.receiveMessage();
+                    Client.sendMessage(msg); //Send via client
+                    Server.receiveMessage(); //Calls the receival of the Server to update the message display
                 } catch (IOException error){
                     error.getStackTrace();
                 }
                 entermsg.clear();
             }else {
-                System.out.println("Message was empty");
+                System.out.println("Message was empty"); //ELSE there was no input and doesnt send anything
             }
         });
 
@@ -201,9 +206,18 @@ public class logicalgi extends Application{
         subPane.getChildren().addAll(margins, bottombar, sendbutton, entermsg);
     //Stage setup
         Stage clientstage = new Stage();
+        clientstage.setResizable(false);
         clientstage.setTitle("ClientChat");
         Scene nxtscene = new Scene(subPane, subSize[0], subSize[1]);
         clientstage.setScene(nxtscene);
+        clientstage.setOnCloseRequest(event ->{ //Event Handler for closing the window
+            clientlog.clear(); //Empties the message display so next client appears with no previous text
+            try {
+                Client.stop(); //Stops the current client socket
+            } catch (IOException error) {
+                error.printStackTrace();
+            }
+        });
         clientstage.show();
     }
 
@@ -211,13 +225,13 @@ public class logicalgi extends Application{
     public static void serverwindow(){
     //Window containers
         Pane subPane = new Pane();
-        AnchorPane margins = new AnchorPane();
-            serverlog.setPrefSize((double)subSize[0],(double)subSize[1]-48);
+        AnchorPane margins = new AnchorPane(); //Anchor for margin based coordinates
+            serverlog.setPrefSize((double)subSize[0],(double)subSize[1]-48); //Sets a size for the message display
             serverlog.setEditable(false);
             margins.setTopAnchor(serverlog, 0.0);
             margins.setLeftAnchor(serverlog, 0.0);
-        ScrollPane txtscroll = new ScrollPane(serverlog);
-
+        ScrollPane txtscroll = new ScrollPane(serverlog); //Creates a scrollbar for the message display
+    
     //Nodes
         //     _______________________
         //____/ 1st order objects(Plain/non-interactive)
@@ -242,19 +256,19 @@ public class logicalgi extends Application{
             sendbutton.setLayoutX(bottombar.getLayoutX()+7);
             sendbutton.setLayoutY(bottombar.getLayoutY()+7.5);
         
-        sendbutton.setOnAction(event ->{
-            String msg = entermsg.getText().trim();
+        sendbutton.setOnAction(event ->{ //Event handler for the action of clicking the button and sending messages
+            String msg = entermsg.getText().trim(); //Gets the textfield input and trims it to remove any blank spaces
             if(!msg.isEmpty()){
-                serverlog.appendText("ServerSays: "+msg+"\n");
+                serverlog.appendText("ServerSays: "+msg+"\n"); //IF there was actual input it displays in the local message display
                 try{
-                    Server.sendMessage(msg);
-                    Client.receiveMessage();
+                    Server.sendMessage(msg); //Sends message via Server(host)
+                    Client.receiveMessage(); //Uses the receival of the message to update the message display
                 } catch (IOException error){
                     error.getStackTrace();
                 }
-                entermsg.clear();
+                entermsg.clear(); //Clears the textfield
             }else {
-                System.out.println("Message was empty");
+                System.out.println("Message was empty"); //ELSE there was no input or blank spaces and doesnt send anything
             }
         });
         
@@ -263,13 +277,24 @@ public class logicalgi extends Application{
         subPane.getChildren().addAll(margins, bottombar, sendbutton, entermsg);
     //Stage setup
         Stage serverstage = new Stage();
+        serverstage.setResizable(false);
         serverstage.setTitle("ServerChat");
         Scene nxtscene = new Scene(subPane,subSize[0], subSize[1]);
         serverstage.setScene(nxtscene);
+        servertstage.setOnCloseRequest(event ->{ //Event handler for action of closing the window
+            serverlog.clear(); //Empties the message display so that upon new server creation it appear clear
+            try {
+                Server.stop();// Stops the Server socket
+            } catch (IOException error) {
+                error.printStackTrace();
+            }
+        });
         serverstage.show();
     }
     
-    /*Method for updating the respective textfield of the ongoing app
+    /*Method for updating the respective TextArea of the ongoing app by displaying a message on request by Server or Client
+    *@param arg message to display
+    *@param type true for updating serverlog on Client input receive , false for updating clientlog on Server input receive
     */
     public static void updatelog(String arg, Boolean type){
         if (type==true){
@@ -278,7 +303,9 @@ public class logicalgi extends Application{
             clientlog.appendText("ServerSays: "+arg+"\n");
         }
     }
-    
+
+    /* Method for launching the app
+    */
     public static void main(String[] args){
         launch(args);
     }
